@@ -53,6 +53,7 @@ class DashboardPageState extends State<DashboardPage> {
             IconButton(
               icon: Icon(Icons.cancel),
               onPressed: () {
+                databaseHelper.clearSP();
                 Navigator.of(context).push(new MaterialPageRoute(
                   builder: (BuildContext context) => new LoginPage(),
                 ));

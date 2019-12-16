@@ -131,6 +131,7 @@ class AddCoursePageState extends State<AddCoursePage> {
             IconButton(
               icon: Icon(Icons.cancel),
               onPressed: () {
+                databaseHelper.clearSP();
                 Navigator.of(context).push(new MaterialPageRoute(
                   builder: (BuildContext context) => new LoginPage(),
                 ));
@@ -205,7 +206,6 @@ class AddCoursePageState extends State<AddCoursePage> {
                       new Builder(
                         builder: (BuildContext context) => _img != null
                             ? new Container(
-//                          padding: const EdgeInsets.only(bottom: 10.0),
                                 height:
                                     MediaQuery.of(context).size.height * 0.11,
                                 child: new Scrollbar(
@@ -325,18 +325,19 @@ class ShowCoursePageState extends State<ShowCoursePage> {
           ),
           actions: <Widget>[
             IconButton(
-              icon: Icon(Icons.cancel),
-              onPressed: () {
-                Navigator.of(context).push(new MaterialPageRoute(
-                  builder: (BuildContext context) => new LoginPage(),
-                ));
-              },
-            ),
-            IconButton(
               icon: Icon(Icons.home),
               onPressed: () {
                 Navigator.of(context).push(new MaterialPageRoute(
                   builder: (BuildContext context) => new DashboardPage(),
+                ));
+              },
+            ),
+            IconButton(
+              icon: Icon(Icons.cancel),
+              onPressed: () {
+                databaseHelper.clearSP();
+                Navigator.of(context).push(new MaterialPageRoute(
+                  builder: (BuildContext context) => new LoginPage(),
                 ));
               },
             ),
@@ -541,13 +542,14 @@ class EditCoursePage extends StatefulWidget {
 
 class EditCoursePageState extends State<EditCoursePage> {
   DatabaseHelper databaseHelper = new DatabaseHelper();
-
+  File _img;
   TextEditingController _nameController = new TextEditingController();
   TextEditingController _timeController = new TextEditingController();
   TextEditingController _seatsController = new TextEditingController();
   TextEditingController _shortDescriptionController =
       new TextEditingController();
   TextEditingController _majorsController = new TextEditingController();
+
   @override
   void initState() {
     super.initState();
@@ -563,21 +565,18 @@ class EditCoursePageState extends State<EditCoursePage> {
     });
   }
 
-//  @override
-//  void initState() {
-//    _nameController = new TextEditingController(
-//        text: widget.list[widget.index]['name'].toString());
-//    _timeController = new TextEditingController(
-//        text: widget.list[widget.index]['time'].toString());
-//    _seatsController = new TextEditingController(
-//        text: widget.list[widget.index]['seats'].toString());
-//    _shortDescriptionController = new TextEditingController(
-//        text: widget.list[widget.index]['short_description'].toString());
-//    _majorsController = new TextEditingController(
-//        text: widget.list[widget.index]['majors'].toString());
-//    _teacherController = new TextEditingController(
-//        text: widget.list[widget.index]['teacher'].toString());
-//  }
+  void _openFileExplorer() async {
+    try {
+      var image = await FilePicker.getFile(type: FileType.IMAGE);
+      print("imageFile = $image");
+      print("imagePath =  ${image.path}");
+      setState(() {
+        _img = image;
+      });
+    } on PlatformException catch (e) {
+      print("Error while picking the file: " + e.toString());
+    }
+  }
 
   _updateCourse() {
     setState(() {
@@ -595,9 +594,8 @@ class EditCoursePageState extends State<EditCoursePage> {
           shortDescription,
           majors,
         ];
-        int id = widget.courseId;
         dynamic updateCourse = databaseHelper.updateCourse(
-            widget.teacherId, widget.courseId, data);
+            widget.teacherId, widget.courseId, data, _img);
         updateCourse.whenComplete(() {
           if (databaseHelper.status) {
             print("dataList = ${databaseHelper.dataList}");
@@ -633,6 +631,7 @@ class EditCoursePageState extends State<EditCoursePage> {
             IconButton(
               icon: Icon(Icons.cancel),
               onPressed: () {
+                databaseHelper.clearSP();
                 Navigator.of(context).push(new MaterialPageRoute(
                   builder: (BuildContext context) => new LoginPage(),
                 ));
@@ -693,7 +692,46 @@ class EditCoursePageState extends State<EditCoursePage> {
                           icon: Icon(Icons.description),
                         ),
                       ),
-                      new Padding(padding: new EdgeInsets.all(10)),
+                      new Padding(
+                        padding: const EdgeInsets.only(top: 10.0, bottom: 10.0),
+                        child: RaisedButton(
+                          color: Colors.lightBlue,
+                          onPressed: _openFileExplorer,
+                          child: Text(
+                            "upload file",
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      ),
+                      new Builder(
+                        builder: (BuildContext context) => _img != null
+                            ? new Container(
+                                height:
+                                    MediaQuery.of(context).size.height * 0.11,
+                                child: new Scrollbar(
+                                    child: new ListView.separated(
+                                  itemCount: 1,
+                                  itemBuilder:
+                                      (BuildContext context, int index) {
+                                    final bool isMultiPath = false;
+                                    final String name = 'ImageFile: ' +
+                                        (_img.path.split('/').last);
+                                    final path = "${_img.path}";
+
+                                    return new ListTile(
+                                      title: new Text(
+                                        name,
+                                      ),
+                                      subtitle: new Text(path),
+                                    );
+                                  },
+                                  separatorBuilder:
+                                      (BuildContext context, int index) =>
+                                          new Divider(),
+                                )),
+                              )
+                            : new Container(),
+                      ),
                       TextField(
                         controller: _majorsController,
                         keyboardType: TextInputType.number,

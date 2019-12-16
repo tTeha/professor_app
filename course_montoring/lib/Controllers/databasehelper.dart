@@ -203,49 +203,42 @@ class DatabaseHelper {
     return [false];
   }
 
-  Future<dynamic> updateCourse(int teacherId, int id, List courseData) async {
+  Future<dynamic> updateCourse(
+      int teacherId, int id, List courseData, File imgFile) async {
     String myURL = "$serverURL/teacher/$teacherId/course/$id/";
-    final response = await http.put(
-      myURL,
-      headers: {
-        'Accept': 'application/json',
-//        'Authorization': '$token $readToken()',
-      },
-      body: {
-        'name': '${courseData[0]}',
-        'time': '${courseData[1]}',
-        'seats': '${courseData[2]}',
-        'short_description': "${courseData[3]}",
-//        'main_img': "${courseData[4]}",
-        'majors': '${courseData[4]}',
-      },
-    );
-    var data = json.decode(response.body);
-    print('statusCode = ${response.statusCode}');
-    print('body = ${response.body}');
-//    Map mapValue = json.decode(response.body);
-//    print('mapValue =  ${mapValue.toString()}');
-    if (response.statusCode == 200) {
-//      print('data : ${data["token"]}');
-      status = true;
-      dataList.add("${data['id']}");
-      dataList.add("${data['name']}");
-      dataList.add("${data['time']}");
-      dataList.add("${data['seats']}");
-      dataList.add("${data['short_description']}");
-//      dataList.add("${data['main_img']}");
-      dataList.add("${data['majors']}");
-      dataList.add("${data['teacher']}");
-      dataList.add("${data['created_on']}");
-      dataList.add("${data['modified_on']}");
+    FormData formData;
+    Response _response;
+    if (imgFile != null) {
+      formData = new FormData.fromMap({
+        "name": "${courseData[0]}",
+        "time": "${courseData[1]}",
+        "seats": "${courseData[2]}",
+        "short_description": "${courseData[3]}",
+        "main_img": await MultipartFile.fromFile(imgFile.path,
+            filename: "${imgFile.path.split('/').last}"),
+        "majors": "${courseData[4]}",
+      });
     } else {
-      status = false;
+      formData = new FormData.fromMap({
+        "name": "${courseData[0]}",
+        "time": "${courseData[1]}",
+        "seats": "${courseData[2]}",
+        "short_description": "${courseData[3]}",
+        "majors": "${courseData[4]}",
+      });
     }
-    print('statusCode = ${response.statusCode}');
-//  print('body = ${response.body}');
-    Map mapValue = json.decode(response.body);
-    print('mapValue =  ${mapValue.toString()}');
-    if (response.statusCode == 200) return json.decode(response.body);
+
+    try {
+      Dio dio = new Dio();
+      _response = await dio.patch(myURL, data: formData);
+    } catch (e) {
+      status = false;
+      print(e);
+    }
+    if (_response.statusCode == 200) {
+      status = true;
+      return _response.data;
+    }
     return [false];
   }
 
@@ -277,5 +270,10 @@ class DatabaseHelper {
     final value = prefs.get(key) ?? 0;
     print('read toke : $value');
     return value;
+  }
+
+  clearSP() async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.clear();
   }
 }

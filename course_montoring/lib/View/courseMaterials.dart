@@ -90,6 +90,25 @@ class AddCourseMaterialPageState extends State<AddCourseMaterialPage> {
           title: Center(
             child: Text("${widget.title}"),
           ),
+          actions: <Widget>[
+            IconButton(
+              icon: Icon(Icons.home),
+              onPressed: () {
+                Navigator.of(context).push(new MaterialPageRoute(
+                  builder: (BuildContext context) => new DashboardPage(),
+                ));
+              },
+            ),
+            IconButton(
+              icon: Icon(Icons.cancel),
+              onPressed: () {
+                databaseHelper.clearSP();
+                Navigator.of(context).push(new MaterialPageRoute(
+                  builder: (BuildContext context) => new LoginPage(),
+                ));
+              },
+            ),
+          ],
         ),
         body: Container(
           child: ListView(
@@ -276,26 +295,27 @@ class ShowMaterialsPageState extends State<ShowMaterialsPage> {
     return MaterialApp(
       title: 'Course Details',
       home: Scaffold(
-        backgroundColor: Colors.black,
+        backgroundColor: Colors.white,
         appBar: AppBar(
-          backgroundColor: Colors.green,
+          backgroundColor: Colors.black,
           title: Center(
             child: Text("Courses Details"),
           ),
           actions: <Widget>[
             IconButton(
-              icon: Icon(Icons.cancel),
-              onPressed: () {
-                Navigator.of(context).push(new MaterialPageRoute(
-                  builder: (BuildContext context) => new LoginPage(),
-                ));
-              },
-            ),
-            IconButton(
               icon: Icon(Icons.home),
               onPressed: () {
                 Navigator.of(context).push(new MaterialPageRoute(
                   builder: (BuildContext context) => new DashboardPage(),
+                ));
+              },
+            ),
+            IconButton(
+              icon: Icon(Icons.cancel),
+              onPressed: () {
+                databaseHelper.clearSP();
+                Navigator.of(context).push(new MaterialPageRoute(
+                  builder: (BuildContext context) => new LoginPage(),
                 ));
               },
             ),

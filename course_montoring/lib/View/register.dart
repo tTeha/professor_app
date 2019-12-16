@@ -47,8 +47,6 @@ class RegisterPageState extends State<RegisterPage> {
               _showDialog('Error', databaseHelper.error);
               databaseHelper.error = '';
             } else {
-              _showDialog('data',
-                  "${databaseHelper.dataList[0] + ", " + databaseHelper.dataList[1] + ", " + databaseHelper.dataList[2] + ", " + databaseHelper.dataList[3]}");
               databaseHelper.dataList = [];
               Navigator.pushReplacementNamed(context, 'login/');
             }
